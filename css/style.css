@@ -1,4 +1,4 @@
-:root { font-family: "Nunito", sans-serif; color: #172554; background: #f2f6ff; }
+:root { --font-pixel: "Press Start 2P", "Courier New", monospace; font-family: "Nunito", sans-serif; color: #172554; background: #f2f6ff; }
 body { min-width: 320px; min-height: 100vh; background: radial-gradient(ellipse at 12% 8%, rgba(147,197,253,.32), transparent 30rem), #f2f6ff; }
 .battle-app { padding-top: 2rem; }
 .app-header { margin-bottom: 1.25rem !important; }
@@ -74,20 +74,22 @@ body { min-width: 320px; min-height: 100vh; background: radial-gradient(ellipse 
   to { opacity: 1; transform: translate(0,0) scale(1); }
 }
 .battle-divider { position: absolute; z-index: 2; top: 50%; left: 50%; display: grid; width: 2.4rem; height: 2.4rem; place-items: center; transform: translate(-50%,-50%); border: 3px solid rgba(255,255,255,.8); border-radius: 50%; background: #f59e0b; color: white; font-size: .68rem; font-weight: 900; box-shadow: 0 4px 12px #64748b55; }
-.battle-console { position: relative; z-index: 2; display: flex; min-height: 100px; align-items: center; justify-content: space-between; gap: 1rem; margin-top: -1.3rem; padding: 1.15rem 1.4rem 1rem; border: 2px solid #172554; border-radius: .75rem; background: #fff; box-shadow: 0 8px 22px rgba(23,37,84,.15); }
+.battle-console { position: relative; z-index: 2; display: flex; min-height: 100px; align-items: center; justify-content: space-between; gap: 1rem; margin-top: -1.3rem; padding: 1.15rem 1.4rem 1rem; border: 3px solid #172554; border-radius: .25rem; background: #fff; box-shadow: 4px 4px 0 rgba(23,37,84,.18); }
 .console-topline { position: absolute; top: .35rem; left: .65rem; display: flex; align-items: center; gap: .25rem; }
 .console-dot { width: .38rem; height: .38rem; border-radius: 50%; background: #cbd5e1; }
-.console-caption { margin-left: .35rem; color: #94a3b8; font-size: .58rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-.battle-message { margin: .4rem 0 0; color: #1e293b; font-size: .95rem; font-weight: 800; line-height: 1.45; }
-.console-actions { flex: 0 0 auto; }.action-panel { margin-top: 1rem; border: 1px solid #dce6f7; border-radius: 1rem; }
+.console-caption { margin-left: .35rem; color: #64748b; font-family: var(--font-pixel); font-size: .48rem; font-weight: 400; letter-spacing: .04em; text-transform: uppercase; }
+.battle-message { margin: .4rem 0 0; color: #1e293b; font-family: var(--font-pixel); font-size: .62rem; font-weight: 400; line-height: 1.9; }
+.console-actions { flex: 0 0 auto; }.console-actions .button { border: 2px solid #172554; border-radius: .2rem; font-family: var(--font-pixel); font-size: .52rem; }.action-panel { margin-top: 1rem; border: 3px solid #172554; border-radius: .25rem; box-shadow: 4px 4px 0 rgba(23,37,84,.12); }
 .action-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .action-heading .title { margin: .15rem 0 .8rem; color: #172554; }.action-heading > p { font-size: .82rem; }
 .action-buttons { display: grid; grid-template-columns: repeat(4,1fr); gap: .65rem; margin-bottom: .8rem !important; }
-.action-button { display: flex; height: 3.2rem; align-items: center; justify-content: center; gap: .5rem; border: 0; border-radius: .7rem; color: #fff; font-weight: 900; transition: transform .15s,filter .15s; }
+.action-button { display: flex; height: 3.2rem; align-items: center; justify-content: center; gap: .5rem; border: 2px solid #172554; border-radius: .2rem; color: #fff; font-family: var(--font-pixel); font-size: .58rem; font-weight: 400; transition: transform .15s,filter .15s; }
 .action-button:hover { color: #fff; filter: brightness(1.06); transform: translateY(-2px); }
 .fight-button { background: #ef4444; }.bag-button { background: #e99b17; }.team-button { background: #3b82f6; }.flee-button { background: #64748b; }
 .choice-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .6rem; margin-bottom: .8rem; }
-.choice-button { min-height: 3.1rem; justify-content: space-between; white-space: normal; }.choice-button .move-detail { color: #64748b; font-size: .72rem; }
+.choice-button { min-height: 3.1rem; justify-content: space-between; white-space: normal; border: 2px solid #94a3b8; border-radius: .2rem; }.choice-button > span:first-child { font-family: var(--font-pixel); font-size: .52rem; line-height: 1.7; }.choice-button .move-detail { color: #64748b; font-size: .72rem; }
+.choice-back-button { grid-column: 1 / -1; min-height: 2.6rem; justify-content: flex-start; border: 2px solid #172554; border-radius: .2rem; background: #eff6ff; color: #172554; font-family: var(--font-pixel); font-size: .5rem; }
+.choice-back-button:hover { border-color: #172554; background: #dbeafe; color: #172554; }
 .inventory-line { display: flex; align-items: center; gap: .45rem; color: #64748b; font-size: .72rem; font-weight: 800; }.inventory-line .tag { font-size: .68rem; }
 .footer-note { padding: .8rem 0 0; color: #64748b; font-size: .75rem; text-align: center; }
 @media (max-width: 600px) {
@@ -95,8 +97,8 @@ body { min-width: 320px; min-height: 100vh; background: radial-gradient(ellipse 
   .arena { min-height: 440px; padding: .75rem; }.opponent-side,.player-side { min-height: 185px; }.pokemon-card { width: 62%; padding: .65rem; }.pokemon-name { font-size: 1rem; }
   .pokemon-sprite { width: 165px; height: 175px; }.opponent-sprite { margin-right: 0; }.player-sprite { margin-left: 0; }
   .trainer-silhouette { transform: scale(.8); }.trainer-presentation { font-size: .65rem; }.trainer-intro { gap: 3.5rem; }
-  .battle-console { min-height: 105px; padding: 1.25rem .8rem .75rem; }.battle-message { font-size: .82rem; }.console-actions .button { font-size: .75rem; }
-  .action-buttons { grid-template-columns: repeat(2,1fr); }.action-button { height: 2.8rem; }.action-heading { align-items: flex-start; }.action-heading > p { max-width: 50%; text-align: right; }.inventory-line { flex-wrap: wrap; }
+  .battle-console { min-height: 105px; padding: 1.25rem .8rem .75rem; }.battle-message { font-size: .52rem; }.console-actions .button { font-size: .45rem; }
+  .action-buttons { grid-template-columns: repeat(2,1fr); }.action-button { height: 2.8rem; font-size: .5rem; }.action-heading { align-items: flex-start; }.action-heading > p { max-width: 50%; text-align: right; }.inventory-line { flex-wrap: wrap; }
 }
 @media (max-width: 380px) {
   .pokemon-card { width: 64%; }.pokemon-sprite { width: 140px; height: 155px; }

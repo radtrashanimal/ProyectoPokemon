@@ -76,6 +76,13 @@ function bindEvents() {
   });
 
   document.getElementById("choice-panel").addEventListener("click", (event) => {
+    const backButton = event.target.closest("[data-choice-back]");
+    if (backButton) {
+      visibleActions = [];
+      hideChoices();
+      actualizarInterfaz(gameState);
+      return;
+    }
     const button = event.target.closest("[data-choice]");
     if (!button || button.disabled) return;
     const action = visibleActions[Number(button.dataset.choice)];

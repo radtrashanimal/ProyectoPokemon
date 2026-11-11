@@ -123,8 +123,8 @@ export function showChoices(gameState, type) {
     }];
   }
   panel.innerHTML = choices.map((choice, index) =>
-    `<button class="button is-light choice-button" data-choice="${index}" ${choice.disabled ? "disabled" : ""}><span>${choice.label}</span><span class="move-detail">${choice.detail}</span></button>`
-  ).join("");
+    `<button type="button" class="button is-light choice-button" data-choice="${index}" ${choice.disabled ? "disabled" : ""}><span>${choice.label}</span><span class="move-detail">${choice.detail}</span></button>`
+  ).join("") + '<button type="button" class="button choice-back-button" data-choice-back>← Volver a acciones</button>';
   panel.classList.remove("is-hidden");
   element("main-actions").classList.add("is-hidden");
   element("action-hint").textContent = "Selecciona una opción.";
