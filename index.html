@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172554">
+  <title>Pokémon | Batalla local</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="section battle-app">
+    <div class="container is-max-desktop">
+      <header class="level app-header">
+        <div class="level-left"><div><p class="eyebrow">MODO LOCAL · 2 JUGADORES</p><h1 class="title is-3">Arena Pokémon</h1></div></div>
+        <div class="level-right"><span id="round-indicator" class="tag is-link is-light is-medium">Preparando partida…</span></div>
+      </header>
+
+      <div id="loading" class="notification is-info is-light loading-banner" role="status">
+        <span class="loader-dot" aria-hidden="true"></span><span>Cargando equipos de la PokéAPI…</span>
+      </div>
+      <div id="error-notice" class="notification is-warning is-light is-hidden" role="status"></div>
+
+      <section class="arena box" aria-label="Campo de batalla">
+        <div class="arena-landscape" aria-hidden="true"></div>
+        <div class="trainer-intro" aria-hidden="true">
+          <div class="trainer-presentation trainer-presentation-left">
+            <span class="trainer-silhouette"><span class="trainer-head"></span><span class="trainer-body"></span></span>
+            <span>Entrenador 1</span>
+          </div>
+          <div class="trainer-presentation trainer-presentation-right">
+            <span class="trainer-silhouette trainer-silhouette-alt"><span class="trainer-head"></span><span class="trainer-body"></span></span>
+            <span>Entrenador 2</span>
+          </div>
+        </div>
+        <article class="pokemon-side opponent-side">
+          <div class="pokemon-card">
+            <div class="pokemon-heading"><div><p id="opponent-trainer" class="trainer-name">Entrenador 2</p><h2 id="opponent-name" class="pokemon-name">—</h2></div><span id="opponent-level" class="level-label">Nv. —</span></div>
+            <div class="hp-line"><span class="hp-label">PS</span><progress id="opponent-hp-bar" class="progress is-success hp-progress" value="100" max="100">100%</progress></div>
+            <p id="opponent-hp-text" class="hp-numbers">— / —</p>
+            <div id="opponent-types" class="tags type-tags" aria-label="Tipos"></div>
+          </div>
+          <img id="opponent-sprite" class="pokemon-sprite opponent-sprite" alt="" src="">
+        </article>
+        <div class="battle-divider" aria-hidden="true"><span>VS</span></div>
+        <article class="pokemon-side player-side">
+          <img id="player-sprite" class="pokemon-sprite player-sprite" alt="" src="">
+          <div class="pokemon-card player-card">
+            <div class="pokemon-heading"><div><p id="player-trainer" class="trainer-name">Entrenador 1</p><h2 id="player-name" class="pokemon-name">—</h2></div><span id="player-level" class="level-label">Nv. —</span></div>
+            <div class="hp-line"><span class="hp-label">PS</span><progress id="player-hp-bar" class="progress is-success hp-progress" value="100" max="100">100%</progress></div>
+            <p id="player-hp-text" class="hp-numbers">— / —</p>
+            <div id="player-types" class="tags type-tags" aria-label="Tipos"></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="battle-console box" aria-live="polite">
+        <div class="console-topline"><span class="console-dot"></span><span class="console-dot"></span><span class="console-dot"></span><span id="phase-label" class="console-caption">Cargando</span></div>
+        <p id="battle-message" class="battle-message">Preparando a los entrenadores…</p>
+        <div class="console-actions"><button id="continue-button" class="button is-link is-hidden">Continuar</button></div>
+      </section>
+
+      <section id="action-panel" class="action-panel box is-hidden" aria-label="Acciones de batalla">
+        <div class="action-heading"><div><p class="eyebrow">TURNO ACTUAL</p><h2 id="turn-owner" class="title is-5">Entrenador 1</h2></div><p id="action-hint" class="has-text-grey">Elige tu acción.</p></div>
+        <div id="main-actions" class="buttons action-buttons">
+          <button class="button action-button fight-button" data-action="fight">⚔️ <span>Luchar</span></button>
+          <button class="button action-button bag-button" data-action="potion">🧪 <span>Mochila</span></button>
+          <button class="button action-button team-button" data-action="switch">🔁 <span>Pokémon</span></button>
+          <button class="button action-button flee-button" data-action="flee">🏳️ <span>Huir</span></button>
+        </div>
+        <div id="choice-panel" class="choice-grid is-hidden"></div>
+        <div class="inventory-line"><span>Inventario:</span><span id="potion-count-1" class="tag is-light">Entrenador 1: —</span><span id="potion-count-2" class="tag is-light">Entrenador 2: —</span></div>
+      </section>
+      <footer class="footer-note">Los datos se cargan desde PokéAPI. Si no hay conexión, se usan equipos de respaldo.</footer>
+    </div>
+  </main>
+  <script type="module" src="js/script.js"></script>
+</body>
+</html>
