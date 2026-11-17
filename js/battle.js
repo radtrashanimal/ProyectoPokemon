@@ -22,7 +22,7 @@ const TYPE_EFFECTIVENESS = {
 export function createGameState(teams) {
   return {
     teams, activePokemon: [0, 0], potions: [3, 3], currentTurn: 0, round: 1,
-    pendingActions: [null, null], phase: "intro", winner: null, messageQueue: [],
+    pendingActions: [null, null], pendingSwitchPlayer: null, phase: "intro", winner: null, messageQueue: [],
     roundActions: [], animationEvents: [], isAnimating: false,
     lastMessage: "¡Que comience la batalla!"
   };
@@ -148,8 +148,10 @@ export function resolveNextAction(gameState) {
         gameState.roundActions = [];
         message += ` ¡Entrenador ${player + 1} gana la batalla!`;
       } else {
-        gameState.activePokemon[1 - player] = replacementIndex;
-        message += ` Entrenador ${2 - player} envía a ${getActivePokemon(gameState, 1 - player).name}.`;
+        gameState.pendingSwitchPlayer = 1 - player;
+        gameState.currentTurn = 1 - player;
+        gameState.phase = "forced-switch";
+        message += ` Entrenador ${2 - player} debe elegir un Pokémon de reemplazo.`;
       }
     }
   }
@@ -159,11 +161,25 @@ export function resolveNextAction(gameState) {
   if (gameState.winner !== null) {
     gameState.pendingActions = [null, null];
     gameState.phase = "finished";
-  } else if (gameState.roundActions.length === 0) {
+  } else if (gameState.phase !== "forced-switch" && gameState.roundActions.length === 0) {
     gameState.pendingActions = [null, null];
     gameState.phase = "messages";
   }
   return true;
+}
+
+export function replaceFaintedPokemon(gameState, teamIndex) {
+  const player = gameState.pendingSwitchPlayer;
+  const candidate = gameState.teams[player]?.[teamIndex];
+  if (gameState.phase !== "forced-switch" || player === null
+    || !candidate || candidate.hpActual <= 0 || teamIndex === gameState.activePokemon[player]) {
+    return { ok: false, message: "Elige un Pokémon disponible para continuar." };
+  }
+  gameState.activePokemon[player] = teamIndex;
+  gameState.pendingSwitchPlayer = null;
+  gameState.phase = gameState.roundActions.length ? "resolving" : "messages";
+  gameState.lastMessage = `¡${candidate.name} entra en combate!`;
+  return { ok: true, message: gameState.lastMessage };
 }
 
 export function ejecutarTurno(gameState, player, action) {

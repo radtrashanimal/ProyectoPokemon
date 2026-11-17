@@ -1,12 +1,70 @@
 import { loadTeams } from "./api.js";
-import { createGameState, ejecutarTurno, getActivePokemon, resolveNextAction, resolveRound } from "./battle.js";
+import { createGameState, ejecutarTurno, getActivePokemon, replaceFaintedPokemon, resolveNextAction, resolveRound } from "./battle.js";
 import { actualizarInterfaz, hideChoices, playBattleAnimations, showApiFallbackNotice, showChoices, showLoading } from "./ui.js";
 
 export let gameState = null;
 let visibleActions = [];
+let autoRunActive = false;
 
 function showValidationError(message) {
   document.getElementById("action-hint").textContent = message;
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+async function runAutomaticFlow() {
+  if (autoRunActive) return;
+  autoRunActive = true;
+  try {
+    while (gameState && gameState.phase !== "finished") {
+      if (gameState.phase === "handoff") {
+        await wait(1200);
+        if (gameState.phase !== "handoff") continue;
+        gameState.phase = "choose";
+        gameState.lastMessage = gameState.currentTurn === 1
+          ? "Entrenador 2, elige tu acción."
+          : `Ronda ${gameState.round}: Entrenador 1, elige tu acción.`;
+        actualizarInterfaz(gameState);
+      } else if (gameState.phase === "resolving") {
+        await wait(1100);
+        if (gameState.phase !== "resolving") continue;
+        if (!resolveNextAction(gameState)) {
+          actualizarInterfaz(gameState);
+          continue;
+        }
+        gameState.isAnimating = gameState.animationEvents.length > 0;
+        actualizarInterfaz(gameState);
+        if (gameState.isAnimating) {
+          await playBattleAnimations(gameState.animationEvents);
+          gameState.isAnimating = false;
+        }
+        actualizarInterfaz(gameState);
+      } else if (gameState.phase === "forced-switch") {
+        visibleActions = await showChoices(gameState, "switch");
+        break;
+      } else if (gameState.phase === "messages") {
+        await wait(1300);
+        if (gameState.phase !== "messages") continue;
+        if (gameState.messageQueue.length) {
+          gameState.lastMessage = gameState.messageQueue.shift();
+        } else {
+          gameState.phase = gameState.winner === null ? "handoff" : "finished";
+          if (gameState.winner === null) {
+            gameState.round += 1;
+            gameState.currentTurn = 0;
+            gameState.lastMessage = `Ronda ${gameState.round} lista.`;
+          }
+        }
+        actualizarInterfaz(gameState);
+      } else {
+        break;
+      }
+    }
+  } finally {
+    autoRunActive = false;
+  }
 }
 
 async function commitAction(action) {
@@ -15,12 +73,13 @@ async function commitAction(action) {
     showValidationError(result.message);
     return;
   }
-  hideChoices();
+  await hideChoices();
   if (gameState.phase === "resolving") resolveRound(gameState);
   actualizarInterfaz(gameState);
+  runAutomaticFlow();
 }
 
-function handleMainAction(type) {
+async function handleMainAction(type) {
   const player = gameState.currentTurn;
   const pokemon = getActivePokemon(gameState, player);
   if (type === "fight" && pokemon.hpActual <= 0) {
@@ -28,65 +87,54 @@ function handleMainAction(type) {
     return;
   }
   if (type === "flee") {
-    commitAction({ type });
+    await commitAction({ type });
     return;
   }
-  visibleActions = showChoices(gameState, type);
+  visibleActions = await showChoices(gameState, type);
 }
 
 function bindEvents() {
-  document.getElementById("continue-button").addEventListener("click", async () => {
-    if (gameState.isAnimating) return;
-    if (gameState.phase === "resolving") {
-      if (!resolveNextAction(gameState)) {
-        actualizarInterfaz(gameState);
-        return;
-      }
-      gameState.isAnimating = gameState.animationEvents.length > 0;
-      actualizarInterfaz(gameState);
-      if (gameState.isAnimating) {
-        await playBattleAnimations(gameState.animationEvents);
-        gameState.isAnimating = false;
-        actualizarInterfaz(gameState);
-      }
-    } else if (gameState.phase === "messages") {
-      if (gameState.messageQueue.length) {
-        gameState.lastMessage = gameState.messageQueue.shift();
-      } else {
-        gameState.phase = gameState.winner === null ? "handoff" : "finished";
-        if (gameState.winner === null) {
-          gameState.round += 1;
-          gameState.lastMessage = `Ronda ${gameState.round} lista. Entrenador 1, prepara tu elección.`;
-        }
-      }
-    } else if (gameState.phase === "handoff" && gameState.currentTurn === 1) {
-      gameState.phase = "choose";
-      gameState.lastMessage = "Entrenador 2, elige tu acción sin mirar la elección anterior.";
-    } else if (gameState.phase === "handoff" && gameState.currentTurn === 0) {
-      gameState.phase = "choose";
-      gameState.lastMessage = `Ronda ${gameState.round}: Entrenador 1, elige tu acción.`;
-    }
-    hideChoices();
-    actualizarInterfaz(gameState);
-  });
-
-  document.getElementById("main-actions").addEventListener("click", (event) => {
+  document.getElementById("main-actions").addEventListener("click", async (event) => {
     const button = event.target.closest("[data-action]");
-    if (button && gameState.phase === "choose") handleMainAction(button.dataset.action);
+    if (button && gameState.phase === "choose") await handleMainAction(button.dataset.action);
   });
 
-  document.getElementById("choice-panel").addEventListener("click", (event) => {
-    const backButton = event.target.closest("[data-choice-back]");
-    if (backButton) {
+  document.getElementById("selection-modal").addEventListener("click", async (event) => {
+    const modal = document.getElementById("selection-modal");
+    const forcedSwitch = modal.dataset.forcedSwitch === "true";
+    if (event.target.id === "selection-modal" || event.target.closest("#selection-close,#selection-cancel")) {
+      if (forcedSwitch) return;
       visibleActions = [];
-      hideChoices();
-      actualizarInterfaz(gameState);
+      await hideChoices();
+      if (gameState.phase === "choose") actualizarInterfaz(gameState);
       return;
     }
     const button = event.target.closest("[data-choice]");
     if (!button || button.disabled) return;
     const action = visibleActions[Number(button.dataset.choice)];
-    if (action) commitAction(action);
+    if (!action) return;
+    if (forcedSwitch) {
+      const result = replaceFaintedPokemon(gameState, action.teamIndex);
+      if (!result.ok) {
+        showValidationError(result.message);
+        return;
+      }
+      visibleActions = [];
+      await hideChoices();
+      actualizarInterfaz(gameState);
+      runAutomaticFlow();
+      return;
+    }
+    await commitAction(action);
+  });
+
+  document.addEventListener("keydown", async (event) => {
+    if (event.key === "Escape" && !document.getElementById("selection-modal").classList.contains("is-hidden")) {
+      if (document.getElementById("selection-modal").dataset.forcedSwitch === "true") return;
+      visibleActions = [];
+      await hideChoices();
+      if (gameState.phase === "choose") actualizarInterfaz(gameState);
+    }
   });
 }
 
@@ -118,12 +166,14 @@ async function initializeGame() {
     const teams = await loadTeams();
     gameState = createGameState(teams);
     const fallbacks = teams.flat().filter((pokemon) => pokemon.isFallback).map((pokemon) => pokemon.name);
-    showApiFallbackNotice(fallbacks);
+    const moveFallbacks = teams.flat().filter((pokemon) => pokemon.movesFallback).map((pokemon) => pokemon.name);
+    showApiFallbackNotice(fallbacks, moveFallbacks);
     actualizarInterfaz(gameState);
     await playIntro();
     gameState.phase = "handoff";
     gameState.lastMessage = "¡Los Pokémon están listos! Comienza el Entrenador 1.";
     actualizarInterfaz(gameState);
+    runAutomaticFlow();
   } catch (error) {
     document.getElementById("error-notice").textContent = `No se pudo iniciar la partida: ${error.message}`;
     document.getElementById("error-notice").classList.remove("is-hidden");

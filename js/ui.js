@@ -8,6 +8,19 @@ const TYPE_LABELS = {
 };
 const element = (id) => document.getElementById(id);
 const displayedHp = new Map();
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+})[character]);
+const TRANSITION_DURATION = 420;
+
+function waitForTransition() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
+  return new Promise((resolve) => window.setTimeout(resolve, TRANSITION_DURATION));
+}
+
+function nextFrame() {
+  return new Promise((resolve) => window.setTimeout(resolve, 16));
+}
 
 function updateHpBar(bar, percentage) {
   const previous = displayedHp.get(bar.id);
@@ -66,38 +79,38 @@ export function actualizarInterfaz(gameState) {
   element("potion-count-2").textContent = `Entrenador 2: ${gameState.potions[1]} pociones`;
   element("battle-message").textContent = gameState.lastMessage;
   element("phase-label").textContent = gameState.phase === "finished" ? "Fin de partida" : `Ronda ${gameState.round}`;
-  const canContinue = ["handoff", "resolving", "messages"].includes(gameState.phase);
   element("action-panel").classList.toggle("is-hidden", gameState.phase !== "choose");
-  element("continue-button").classList.toggle("is-hidden", !canContinue);
-  element("continue-button").disabled = gameState.isAnimating;
-  if (gameState.phase === "resolving") {
-    const nextAction = gameState.roundActions[0];
-    element("continue-button").textContent = nextAction
-      ? `Resolver acción de Entrenador ${nextAction.player + 1}`
-      : "Finalizar ronda";
-  } else if (gameState.phase === "messages") {
-    element("continue-button").textContent = "Finalizar ronda";
-  } else {
-    element("continue-button").textContent = gameState.currentTurn === 1
-      ? "Pasar al Entrenador 2"
-      : "Empezar siguiente ronda";
-  }
+  element("battle-layout").classList.toggle("awaiting-action", gameState.phase !== "choose");
+  element("player-side").classList.toggle("is-current-turn", gameState.phase === "choose" && gameState.currentTurn === 0);
+  element("opponent-side").classList.toggle("is-current-turn", gameState.phase === "choose" && gameState.currentTurn === 1);
   if (gameState.phase === "choose") {
     element("turn-owner").textContent = `Entrenador ${gameState.currentTurn + 1}`;
     element("action-hint").textContent = `Pokémon activo: ${getActivePokemon(gameState, gameState.currentTurn).name}`;
   }
 }
 
-export function showChoices(gameState, type) {
+export async function showChoices(gameState, type) {
   const panel = element("choice-panel");
-  const player = gameState.currentTurn;
+  const modal = element("selection-modal");
+  const isForcedSwitch = gameState.phase === "forced-switch";
+  const player = isForcedSwitch ? gameState.pendingSwitchPlayer : gameState.currentTurn;
   const team = gameState.teams[player];
+  const closeButton = element("selection-close");
+  const cancelButton = element("selection-cancel");
   let choices = [];
+  let title = "";
+  modal.classList.toggle("switch-menu", type === "switch");
+  modal.dataset.forcedSwitch = String(type === "switch" && isForcedSwitch);
+  closeButton.classList.toggle("is-hidden", type === "switch" && isForcedSwitch);
+  cancelButton.disabled = type === "switch" && isForcedSwitch;
+  cancelButton.textContent = type === "switch" ? "Cancelar" : "Volver a acciones";
+  element("switch-current").innerHTML = "";
   if (type === "fight") {
+    title = `Ataques de ${getActivePokemon(gameState, player).name}`;
     const moves = getActivePokemon(gameState, player).movimientos;
     choices = moves.map((move, index) => ({
       label: move.name,
-      detail: `${TYPE_LABELS[move.type] ?? move.type} · PP ${move.ppActual}/${move.pp}`,
+      detail: `${TYPE_LABELS[move.type] ?? move.type} · Poder ${move.power} · PP ${move.ppActual}/${move.pp}`,
       disabled: !Number.isInteger(move.ppActual) || move.ppActual <= 0,
       action: { type: "fight", moveIndex: index }
     }));
@@ -109,25 +122,56 @@ export function showChoices(gameState, type) {
       });
     }
   } else if (type === "switch") {
-    choices = team.map((pokemon, index) => ({
-      label: pokemon.name, detail: pokemon.hpActual > 0 ? `${pokemon.hpActual}/${pokemon.stats.hp} PS` : "Debilitado",
-      disabled: pokemon.hpActual <= 0 || index === gameState.activePokemon[player],
-      action: { type: "switch", teamIndex: index }
-    }));
+    title = `Equipo del Entrenador ${player + 1}`;
+    choices = team.map((pokemon, index) => ({ pokemon, index }))
+      .filter(({ index }) => index !== gameState.activePokemon[player])
+      .map(({ pokemon, index }) => ({
+        label: pokemon.name,
+        detail: `${pokemon.hpActual > 0 ? `${pokemon.hpActual}/${pokemon.stats.hp} PS` : "Debilitado"} · Nv. ${pokemon.level} · ${pokemon.types.map((entry) => TYPE_LABELS[entry] ?? entry).join(" / ")}`,
+        sprite: pokemon.sprite,
+        disabled: pokemon.hpActual <= 0,
+        action: { type: "switch", teamIndex: index }
+      }));
+    const activePokemon = getActivePokemon(gameState, player);
+    const hpPercentage = Math.max(0, (activePokemon.hpActual / activePokemon.stats.hp) * 100);
+    element("switch-current").innerHTML = `<article class="switch-current-card"><img src="${escapeHtml(player === 0 ? activePokemon.backSprite ?? activePokemon.sprite : activePokemon.sprite)}" alt=""><div><p class="switch-trainer">Entrenador ${player + 1}</p><h3>${escapeHtml(activePokemon.name)}</h3><span>Nv. ${activePokemon.level} · ${escapeHtml(activePokemon.types.map((entry) => TYPE_LABELS[entry] ?? entry).join(" / "))}</span><div class="switch-hp-bar"><span style="width:${hpPercentage}%"></span></div><p>${activePokemon.hpActual <= 0 ? "Debilitado" : `${activePokemon.hpActual} / ${activePokemon.stats.hp} PS`}</p></div></article>`;
   } else if (type === "potion") {
     const pokemon = getActivePokemon(gameState, player);
+    title = `Mochila del Entrenador ${player + 1}`;
     choices = [{
-      label: "Poción", detail: `${gameState.potions[player]} disponibles · restaura hasta 30 PS`,
+      label: "🧪 Poción",
+      detail: `${gameState.potions[player]} disponibles · restaura hasta 30 PS a ${pokemon.name} (${pokemon.hpActual}/${pokemon.stats.hp} PS)`,
       disabled: gameState.potions[player] <= 0 || pokemon.hpActual >= pokemon.stats.hp,
       action: { type: "potion" }
     }];
   }
-  panel.innerHTML = choices.map((choice, index) =>
-    `<button type="button" class="button is-light choice-button" data-choice="${index}" ${choice.disabled ? "disabled" : ""}><span>${choice.label}</span><span class="move-detail">${choice.detail}</span></button>`
-  ).join("") + '<button type="button" class="button choice-back-button" data-choice-back>← Volver a acciones</button>';
-  panel.classList.remove("is-hidden");
-  element("main-actions").classList.add("is-hidden");
-  element("action-hint").textContent = "Selecciona una opción.";
+  panel.innerHTML = choices.map((choice, index) => {
+    const sprite = choice.sprite
+      ? `<img class="team-choice-sprite" src="${escapeHtml(choice.sprite)}" alt="">`
+      : "";
+    return `<button type="button" class="button is-light choice-button${choice.sprite ? " team-choice-button" : ""}" data-choice="${index}" ${choice.disabled ? "disabled" : ""}><span class="choice-copy"><span class="choice-label">${escapeHtml(choice.label)}</span><span class="move-detail">${escapeHtml(choice.detail)}</span></span>${sprite}</button>`;
+  }).join("") + (choices.length ? "" : '<p class="empty-selection">No hay opciones disponibles.</p>');
+  element("selection-title").textContent = title;
+  modal.setAttribute("aria-hidden", "false");
+  if (type === "switch") {
+    const transition = element("screen-transition");
+    transition.className = "screen-transition transition-black";
+    transition.setAttribute("aria-hidden", "false");
+    await nextFrame();
+    transition.classList.add("is-visible");
+    await waitForTransition();
+    modal.classList.remove("is-hidden");
+    await nextFrame();
+    transition.classList.remove("is-visible");
+    await waitForTransition();
+    transition.className = "screen-transition";
+    transition.setAttribute("aria-hidden", "true");
+  } else {
+    modal.classList.remove("is-hidden");
+  }
+  element("action-hint").textContent = "Elige una opción.";
+  const focusTarget = isForcedSwitch ? panel.querySelector("[data-choice]:not(:disabled)") : closeButton;
+  focusTarget?.focus();
   return choices.map(({ action }) => action);
 }
 
@@ -158,22 +202,48 @@ export function playBattleAnimations(events) {
   );
 }
 
-export function hideChoices() {
-  element("choice-panel").classList.add("is-hidden");
+export async function hideChoices() {
+  const modal = element("selection-modal");
+  const isSwitchMenu = modal.classList.contains("switch-menu") && !modal.classList.contains("is-hidden");
+  if (isSwitchMenu) {
+    const transition = element("screen-transition");
+    transition.className = "screen-transition transition-white";
+    transition.setAttribute("aria-hidden", "false");
+    await nextFrame();
+    transition.classList.add("is-visible");
+    await waitForTransition();
+  }
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+  modal.classList.remove("switch-menu");
+  modal.dataset.forcedSwitch = "false";
   element("choice-panel").innerHTML = "";
-  element("main-actions").classList.remove("is-hidden");
+  element("switch-current").innerHTML = "";
+  element("selection-close").classList.remove("is-hidden");
+  element("selection-cancel").disabled = false;
+  element("selection-cancel").textContent = "Volver a acciones";
+  if (isSwitchMenu) {
+    const transition = element("screen-transition");
+    transition.classList.remove("is-visible");
+    await waitForTransition();
+    transition.className = "screen-transition";
+    transition.setAttribute("aria-hidden", "true");
+  }
 }
 
 export function showLoading(isLoading) {
   element("loading").classList.toggle("is-hidden", !isLoading);
 }
 
-export function showApiFallbackNotice(names) {
+export function showApiFallbackNotice(names, moveNames = []) {
   const notice = element("error-notice");
-  if (!names.length) {
+  if (!names.length && !moveNames.length) {
     notice.classList.add("is-hidden");
     return;
   }
-  notice.textContent = `Se usaron datos de respaldo para: ${names.join(", ")}.`;
+  const messages = [];
+  if (names.length) messages.push(`Se usaron datos de respaldo para: ${names.join(", ")}.`);
+  if (moveNames.length) messages.push(`Se usaron movimientos de respaldo para: ${moveNames.join(", ")}.`);
+  notice.textContent = messages.join(" ");
   notice.classList.remove("is-hidden");
 }
