@@ -127,7 +127,7 @@ export function showFightOptions(gameState) {
   element("action-hint").insertAdjacentHTML("afterend",
     '<button class="button fight-back-button" type="button" data-action="back">Volver</button>');
 
-  return actions;
+  return actions.map(({ action }) => action);
 }
 
 export function showMainActions() {
