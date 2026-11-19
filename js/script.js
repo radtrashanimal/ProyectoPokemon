@@ -1,6 +1,6 @@
 import { loadTeams } from "./api.js";
 import { createGameState, ejecutarTurno, getActivePokemon, replaceFaintedPokemon, resolveNextAction, resolveRound } from "./battle.js";
-import { actualizarInterfaz, hideChoices, playBattleAnimations, showApiFallbackNotice, showChoices, showLoading } from "./ui.js";
+import { actualizarInterfaz, hideChoices, playBattleAnimations, showApiFallbackNotice, showChoices, showFightOptions, showLoading, showMainActions } from "./ui.js";
 
 export let gameState = null;
 let visibleActions = [];
@@ -74,6 +74,7 @@ async function commitAction(action) {
     return;
   }
   await hideChoices();
+  showMainActions();
   if (gameState.phase === "resolving") resolveRound(gameState);
   actualizarInterfaz(gameState);
   runAutomaticFlow();
@@ -82,8 +83,12 @@ async function commitAction(action) {
 async function handleMainAction(type) {
   const player = gameState.currentTurn;
   const pokemon = getActivePokemon(gameState, player);
-  if (type === "fight" && pokemon.hpActual <= 0) {
-    showValidationError("Este Pokémon está debilitado; elige otro de tu equipo.");
+  if (type === "fight") {
+    if (pokemon.hpActual <= 0) {
+      showValidationError("Este Pokémon está debilitado; elige otro de tu equipo.");
+      return;
+    }
+    visibleActions = showFightOptions(gameState);
     return;
   }
   if (type === "flee") {
@@ -94,9 +99,27 @@ async function handleMainAction(type) {
 }
 
 function bindEvents() {
+  document.getElementById("action-panel").addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-action='back']");
+    if (!button || gameState.phase !== "choose") return;
+    visibleActions = [];
+    showMainActions();
+  });
+
   document.getElementById("main-actions").addEventListener("click", async (event) => {
     const button = event.target.closest("[data-action]");
-    if (button && gameState.phase === "choose") await handleMainAction(button.dataset.action);
+    if (!button || gameState.phase !== "choose") return;
+    if (button.dataset.action === "attack") {
+      const action = visibleActions[Number(button.dataset.choice)];
+      if (action) await commitAction(action);
+      return;
+    }
+    if (button.dataset.action === "back") {
+      visibleActions = [];
+      showMainActions();
+      return;
+    }
+    await handleMainAction(button.dataset.action);
   });
 
   document.getElementById("selection-modal").addEventListener("click", async (event) => {

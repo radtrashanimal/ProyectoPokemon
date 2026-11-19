@@ -89,6 +89,57 @@ export function actualizarInterfaz(gameState) {
   }
 }
 
+export function showFightOptions(gameState) {
+  const pokemon = getActivePokemon(gameState, gameState.currentTurn);
+  const panel = element("main-actions");
+  let actions = pokemon.movimientos.map((move, moveIndex) => ({
+    disabled: !Number.isInteger(move.ppActual) || move.ppActual <= 0,
+    action: { type: "fight", moveIndex }
+  }));
+
+  if (pokemon.movimientos.every((move) => !Number.isInteger(move.ppActual) || move.ppActual <= 0)) {
+    actions.push({
+      disabled: false,
+      action: { type: "struggle" }
+    });
+  }
+
+  const allMovesDepleted = pokemon.movimientos.every((move) => !Number.isInteger(move.ppActual) || move.ppActual <= 0);
+  const moveButtons = allMovesDepleted ? "" : pokemon.movimientos.map((move, moveIndex) => `
+    <button class="button action-button move-button" type="button"
+      data-action="attack" data-choice="${moveIndex}"
+      ${actions[moveIndex].disabled ? "disabled" : ""}>
+      <span>${escapeHtml(move.name)}</span>
+      <small>${TYPE_LABELS[move.type] ?? move.type} · ${move.power} · PP ${move.ppActual}/${move.pp}</small>
+    </button>
+  `).join("");
+
+  const struggleButton = actions.length > pokemon.movimientos.length ? `
+    <button class="button action-button move-button" type="button"
+      data-action="attack" data-choice="${pokemon.movimientos.length}">
+      <span>Forcejeo</span>
+      <small>Normal · Poder 50 · sin límite de PP</small>
+    </button>
+  ` : "";
+
+  panel.innerHTML = `${moveButtons}${struggleButton}`;
+  element("action-hint").textContent = `Ataques de ${pokemon.name}`;
+  element("action-hint").insertAdjacentHTML("afterend",
+    '<button class="button fight-back-button" type="button" data-action="back">Volver</button>');
+
+  return actions;
+}
+
+export function showMainActions() {
+  element("action-panel").querySelector(".fight-back-button")?.remove();
+  element("main-actions").innerHTML = `
+    <button class="button action-button fight-button" data-action="fight">⚔️ <span>Luchar</span></button>
+    <button class="button action-button bag-button" data-action="potion">🧪 <span>Mochila</span></button>
+    <button class="button action-button team-button" data-action="switch">🔁 <span>Pokémon</span></button>
+    <button class="button action-button flee-button" data-action="flee">🏳️ <span>Huir</span></button>`;
+  element("action-hint").textContent = "Elige tu acción.";
+}
+
 export async function showChoices(gameState, type) {
   const panel = element("choice-panel");
   const modal = element("selection-modal");
@@ -134,13 +185,14 @@ export async function showChoices(gameState, type) {
       }));
     const activePokemon = getActivePokemon(gameState, player);
     const hpPercentage = Math.max(0, (activePokemon.hpActual / activePokemon.stats.hp) * 100);
-    element("switch-current").innerHTML = `<article class="switch-current-card"><img src="${escapeHtml(player === 0 ? activePokemon.backSprite ?? activePokemon.sprite : activePokemon.sprite)}" alt=""><div><p class="switch-trainer">Entrenador ${player + 1}</p><h3>${escapeHtml(activePokemon.name)}</h3><span>Nv. ${activePokemon.level} · ${escapeHtml(activePokemon.types.map((entry) => TYPE_LABELS[entry] ?? entry).join(" / "))}</span><div class="switch-hp-bar"><span style="width:${hpPercentage}%"></span></div><p>${activePokemon.hpActual <= 0 ? "Debilitado" : `${activePokemon.hpActual} / ${activePokemon.stats.hp} PS`}</p></div></article>`;
+    element("switch-current").innerHTML = `<article class="switch-current-card"><img src="${escapeHtml(activePokemon.sprite)}" alt=""><div><p class="switch-trainer">Entrenador ${player + 1}</p><h3>${escapeHtml(activePokemon.name)}</h3><span>Nv. ${activePokemon.level} · ${escapeHtml(activePokemon.types.map((entry) => TYPE_LABELS[entry] ?? entry).join(" / "))}</span><div class="switch-hp-bar"><span style="width:${hpPercentage}%"></span></div><p>${activePokemon.hpActual <= 0 ? "Debilitado" : `${activePokemon.hpActual} / ${activePokemon.stats.hp} PS`}</p></div></article>`;
   } else if (type === "potion") {
     const pokemon = getActivePokemon(gameState, player);
     title = `Mochila del Entrenador ${player + 1}`;
     choices = [{
       label: "🧪 Poción",
       detail: `${gameState.potions[player]} disponibles · restaura hasta 30 PS a ${pokemon.name} (${pokemon.hpActual}/${pokemon.stats.hp} PS)`,
+      sprite: pokemon.sprite,
       disabled: gameState.potions[player] <= 0 || pokemon.hpActual >= pokemon.stats.hp,
       action: { type: "potion" }
     }];
