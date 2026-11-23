@@ -19,13 +19,31 @@ const TYPE_EFFECTIVENESS = {
   fairy: { fire: .5, fighting: 2, poison: .5, dragon: 2, dark: 2, steel: .5 }
 };
 
-export function createGameState(teams) {
+export const POTION_TYPES = {
+  basic: { name: "Poción", healing: 30 },
+  medium: { name: "Poción mediana", healing: 60 },
+  large: { name: "Poción grande", healing: 100 }
+};
+
+function getPotionType(potionType) {
+  return Object.prototype.hasOwnProperty.call(POTION_TYPES, potionType)
+    ? POTION_TYPES[potionType]
+    : null;
+}
+
+export function createGameState(teams, trainerNames = ["Entrenador 1", "Entrenador 2"]) {
   return {
-    teams, activePokemon: [0, 0], potions: [3, 3], currentTurn: 0, round: 1,
+    teams, trainerNames, activePokemon: [0, 0],
+    potions: [{ basic: 3, medium: 2, large: 1 }, { basic: 3, medium: 2, large: 1 }],
+    currentTurn: 0, round: 1,
     pendingActions: [null, null], pendingSwitchPlayer: null, phase: "intro", winner: null, messageQueue: [],
     roundActions: [], animationEvents: [], isAnimating: false,
     lastMessage: "¡Que comience la batalla!"
   };
+}
+
+function trainerName(gameState, player) {
+  return gameState.trainerNames[player];
 }
 
 export function getActivePokemon(gameState, player) {
@@ -58,15 +76,18 @@ export function cambiarPokemon(gameState, player, teamIndex) {
   return { ok: true, message: `¡${candidate.name} entra en combate!` };
 }
 
-export function usarPocion(gameState, player) {
-  const pokemon = getActivePokemon(gameState, player);
-  if (gameState.potions[player] <= 0) return { ok: false, message: "No quedan pociones." };
+export function usarPocion(gameState, player, potionType = "basic", teamIndex = gameState.activePokemon[player]) {
+  const potion = getPotionType(potionType);
+  const pokemon = gameState.teams[player][teamIndex];
+  if (!potion) return { ok: false, message: "Elige una poción válida." };
+  if (!pokemon) return { ok: false, message: "Elige un Pokémon válido." };
+  if (gameState.potions[player][potionType] <= 0) return { ok: false, message: `No quedan unidades de ${potion.name}.` };
   if (pokemon.hpActual <= 0) return { ok: false, message: "Un Pokémon debilitado no puede usar una poción." };
-  if (pokemon.hpActual === pokemon.stats.hp) return { ok: false, message: "Sus PS ya están al máximo." };
-  const healed = Math.min(30, pokemon.stats.hp - pokemon.hpActual);
+  if (pokemon.hpActual >= pokemon.stats.hp) return { ok: false, message: "Sus PS ya están al máximo." };
+  const healed = Math.min(potion.healing, pokemon.stats.hp - pokemon.hpActual);
   pokemon.hpActual += healed;
-  gameState.potions[player] -= 1;
-  return { ok: true, message: `La poción restauró ${healed} PS a ${pokemon.name}.` };
+  gameState.potions[player][potionType] -= 1;
+  return { ok: true, healed, message: `${potion.name} restauró ${healed} PS a ${pokemon.name}.` };
 }
 
 function performAction(gameState, player, action) {
@@ -74,10 +95,15 @@ function performAction(gameState, player, action) {
   const opponent = getActivePokemon(gameState, 1 - player);
   if (action.type === "flee") {
     gameState.winner = 1 - player;
-    return `Entrenador ${player + 1} se rindió. ¡Entrenador ${2 - player} gana la batalla!`;
+    return `${trainerName(gameState, player)} se rindió. ¡${trainerName(gameState, 1 - player)} gana la batalla!`;
   }
   if (action.type === "switch") return cambiarPokemon(gameState, player, action.teamIndex).message;
-  if (action.type === "potion") return usarPocion(gameState, player).message;
+  if (action.type === "potion") {
+    const result = usarPocion(gameState, player, action.potionType, action.teamIndex);
+    return result.ok
+      ? `${trainerName(gameState, player)} usó ${POTION_TYPES[action.potionType ?? "basic"].name} en ${gameState.teams[player][action.teamIndex ?? gameState.activePokemon[player]].name}. Recuperó ${result.healed} PS.`
+      : result.message;
+  }
   if (pokemon.hpActual <= 0) return `${pokemon.name} está debilitado y no puede actuar.`;
   const isStruggle = action.type === "struggle";
   const move = isStruggle
@@ -85,7 +111,13 @@ function performAction(gameState, player, action) {
     : pokemon.movimientos[action.moveIndex];
   if (!move) return "Ese movimiento no está disponible.";
   if (!isStruggle) move.ppActual -= 1;
-  const animationEvent = { attacker: player, defender: 1 - player, hit: false };
+  const animationEvent = {
+    attacker: player,
+    defender: 1 - player,
+    moveIndex: isStruggle ? 0 : action.moveIndex,
+    moveType: move.type,
+    hit: false
+  };
   gameState.animationEvents.push(animationEvent);
   if (Math.random() * 100 >= move.accuracy) return `¡${pokemon.name} usó ${move.name}, pero falló!`;
   const { damage, effectiveness } = calcularDanio(pokemon, opponent, move);
@@ -146,12 +178,12 @@ export function resolveNextAction(gameState) {
       if (replacementIndex === -1) {
         gameState.winner = player;
         gameState.roundActions = [];
-        message += ` ¡Entrenador ${player + 1} gana la batalla!`;
+        message += ` ¡${trainerName(gameState, player)} gana la batalla!`;
       } else {
         gameState.pendingSwitchPlayer = 1 - player;
         gameState.currentTurn = 1 - player;
         gameState.phase = "forced-switch";
-        message += ` Entrenador ${2 - player} debe elegir un Pokémon de reemplazo.`;
+        message += ` ${trainerName(gameState, 1 - player)} debe elegir un Pokémon de reemplazo.`;
       }
     }
   }
@@ -178,7 +210,7 @@ export function replaceFaintedPokemon(gameState, teamIndex) {
   gameState.activePokemon[player] = teamIndex;
   gameState.pendingSwitchPlayer = null;
   gameState.phase = gameState.roundActions.length ? "resolving" : "messages";
-  gameState.lastMessage = `¡${candidate.name} entra en combate!`;
+  gameState.lastMessage = `¡${candidate.name} entra en combate para ${trainerName(gameState, player)}!`;
   return { ok: true, message: gameState.lastMessage };
 }
 
@@ -192,9 +224,13 @@ export function ejecutarTurno(gameState, player, action) {
       return { ok: false, message: "No puedes elegir ese Pokémon." };
     }
   } else if (action.type === "potion") {
-    const pokemon = getActivePokemon(gameState, player);
-    if (gameState.potions[player] <= 0) return { ok: false, message: "No quedan pociones." };
-    if (pokemon.hpActual <= 0 || pokemon.hpActual === pokemon.stats.hp) {
+    const potionType = action.potionType ?? "basic";
+    const potion = getPotionType(potionType);
+    const pokemon = gameState.teams[player][action.teamIndex ?? gameState.activePokemon[player]];
+    if (!potion) return { ok: false, message: "Elige una poción válida." };
+    if (gameState.potions[player][potionType] <= 0) return { ok: false, message: `No quedan unidades de ${potion.name}.` };
+    if (!pokemon) return { ok: false, message: "Elige un Pokémon válido." };
+    if (pokemon.hpActual <= 0 || pokemon.hpActual >= pokemon.stats.hp) {
       return { ok: false, message: pokemon.hpActual <= 0 ? "Un Pokémon debilitado no puede usar una poción." : "Sus PS ya están al máximo." };
     }
   } else if (action.type === "fight") {
@@ -220,7 +256,7 @@ export function ejecutarTurno(gameState, player, action) {
   if (player === 0) {
     gameState.currentTurn = 1;
     gameState.phase = "handoff";
-    gameState.lastMessage = "Acción elegida. Entrega el dispositivo al Entrenador 2.";
+    gameState.lastMessage = `Acción elegida. Entrega el dispositivo a ${trainerName(gameState, 1)}.`;
   } else {
     gameState.phase = "resolving";
   }

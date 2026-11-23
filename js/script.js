@@ -1,13 +1,81 @@
 import { loadTeams } from "./api.js";
 import { createGameState, ejecutarTurno, getActivePokemon, replaceFaintedPokemon, resolveNextAction, resolveRound } from "./battle.js";
-import { actualizarInterfaz, hideChoices, playBattleAnimations, showApiFallbackNotice, showChoices, showFightOptions, showLoading, showMainActions } from "./ui.js";
+import { actualizarInterfaz, hideChoices, hideGameOverScreen, playBattleAnimations, showChoices, showFightOptions, showLoading, showMainActions } from "./ui.js";
 
 export let gameState = null;
 let visibleActions = [];
 let autoRunActive = false;
 
+function showScreen(screenId) {
+  ["menu-screen", "trainer-screen", "settings-screen"].forEach((id) => {
+    document.getElementById(id).classList.toggle("is-hidden", id !== screenId);
+  });
+}
+
+function bindMenuEvents() {
+  document.getElementById("open-trainer-select").addEventListener("click", () => showScreen("trainer-screen"));
+  document.getElementById("open-settings").addEventListener("click", () => showScreen("settings-screen"));
+  document.querySelectorAll("[data-screen='menu']").forEach((button) => {
+    button.addEventListener("click", () => showScreen("menu-screen"));
+  });
+  document.getElementById("font-size-setting").addEventListener("input", (event) => {
+    document.documentElement.style.setProperty("--type-scale", event.target.value);
+  });
+  document.querySelectorAll(".palette-option").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.body.dataset.palette = button.dataset.palette;
+      document.querySelectorAll(".palette-option").forEach((option) => {
+        const selected = option === button;
+        option.classList.toggle("is-selected", selected);
+        option.setAttribute("aria-pressed", String(selected));
+      });
+    });
+  });
+  [["trainer-one", "one"], ["trainer-two", "two"]].forEach(([selectId, avatarId]) => {
+    const select = document.getElementById(selectId);
+    select.addEventListener("change", () => updateTrainerAvatar(select, avatarId));
+  });
+  document.getElementById("start-battle").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      await initializeGame([
+        document.getElementById("trainer-one").value,
+        document.getElementById("trainer-two").value
+      ]);
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
+function updateTrainerAvatar(select, avatarId) {
+  const avatar = document.querySelector(`[data-avatar="${avatarId}"]`);
+  const trainer = select.value;
+  const avatarStyles = {
+    Red: ["R", "trainer-avatar-red"],
+    Misty: ["M", "trainer-avatar-misty"],
+    Brock: ["B", "trainer-avatar-brock"],
+    Leaf: ["L", "trainer-avatar-leaf"]
+  };
+  const [initial, className] = avatarStyles[trainer];
+  avatar.textContent = initial;
+  avatar.className = `trainer-avatar ${className}`;
+}
+
 function showValidationError(message) {
   document.getElementById("action-hint").textContent = message;
+}
+
+function returnToMenu() {
+  gameState = null;
+  visibleActions = [];
+  hideGameOverScreen();
+  showLoading(false);
+  document.getElementById("battle-layout").classList.add("is-hidden");
+  document.getElementById("error-notice").classList.add("is-hidden");
+  document.querySelector(".footer-note").classList.add("is-hidden");
+  showScreen("menu-screen");
 }
 
 function wait(milliseconds) {
@@ -24,8 +92,8 @@ async function runAutomaticFlow() {
         if (gameState.phase !== "handoff") continue;
         gameState.phase = "choose";
         gameState.lastMessage = gameState.currentTurn === 1
-          ? "Entrenador 2, elige tu acción."
-          : `Ronda ${gameState.round}: Entrenador 1, elige tu acción.`;
+          ? `${gameState.trainerNames[1]}, elige tu acción.`
+          : `Ronda ${gameState.round}: ${gameState.trainerNames[0]}, elige tu acción.`;
         actualizarInterfaz(gameState);
       } else if (gameState.phase === "resolving") {
         await wait(1100);
@@ -99,6 +167,19 @@ async function handleMainAction(type) {
 }
 
 function bindEvents() {
+  document.getElementById("restart-game").addEventListener("click", async (event) => {
+    if (!gameState) return;
+    const trainerNames = [...gameState.trainerNames];
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      await initializeGame(trainerNames);
+    } finally {
+      button.disabled = false;
+    }
+  });
+  document.getElementById("return-to-menu").addEventListener("click", returnToMenu);
+
   document.getElementById("action-panel").addEventListener("click", async (event) => {
     const button = event.target.closest("[data-action='back']");
     if (!button || gameState.phase !== "choose") return;
@@ -127,6 +208,10 @@ function bindEvents() {
     const forcedSwitch = modal.dataset.forcedSwitch === "true";
     if (event.target.id === "selection-modal" || event.target.closest("#selection-close,#selection-cancel")) {
       if (forcedSwitch) return;
+      if (event.target.closest("#selection-cancel") && modal.dataset.choiceType === "potion-target") {
+        visibleActions = await showChoices(gameState, "potion");
+        return;
+      }
       visibleActions = [];
       await hideChoices();
       if (gameState.phase === "choose") actualizarInterfaz(gameState);
@@ -136,6 +221,10 @@ function bindEvents() {
     if (!button || button.disabled) return;
     const action = visibleActions[Number(button.dataset.choice)];
     if (!action) return;
+    if (action.type === "potion-select") {
+      visibleActions = await showChoices(gameState, "potion-target", action.potionType);
+      return;
+    }
     if (forcedSwitch) {
       const result = replaceFaintedPokemon(gameState, action.teamIndex);
       if (!result.ok) {
@@ -171,6 +260,7 @@ function playIntro() {
       window.clearTimeout(fallbackTimer);
       arena.removeEventListener("animationend", onAnimationEnd);
       arena.classList.remove("intro-playing");
+      arena.classList.add("intro-complete");
       resolve();
     };
     const onAnimationEnd = (event) => {
@@ -182,19 +272,22 @@ function playIntro() {
   });
 }
 
-async function initializeGame() {
+async function initializeGame(trainerNames) {
+  hideGameOverScreen();
+  showScreen(null);
+  document.getElementById("battle-layout").classList.remove("is-hidden");
+  document.querySelector(".footer-note").classList.remove("is-hidden");
+  document.getElementById("error-notice").classList.add("is-hidden");
   showLoading(true);
-  bindEvents();
   try {
     const teams = await loadTeams();
-    gameState = createGameState(teams);
-    const fallbacks = teams.flat().filter((pokemon) => pokemon.isFallback).map((pokemon) => pokemon.name);
-    const moveFallbacks = teams.flat().filter((pokemon) => pokemon.movesFallback).map((pokemon) => pokemon.name);
-    showApiFallbackNotice(fallbacks, moveFallbacks);
+    gameState = createGameState(teams, trainerNames);
+    document.getElementById("intro-trainer-one").textContent = trainerNames[0];
+    document.getElementById("intro-trainer-two").textContent = trainerNames[1];
     actualizarInterfaz(gameState);
     await playIntro();
     gameState.phase = "handoff";
-    gameState.lastMessage = "¡Los Pokémon están listos! Comienza el Entrenador 1.";
+    gameState.lastMessage = `¡Los Pokémon están listos! Comienza ${trainerNames[0]}.`;
     actualizarInterfaz(gameState);
     runAutomaticFlow();
   } catch (error) {
@@ -207,4 +300,11 @@ async function initializeGame() {
   }
 }
 
-initializeGame();
+function initializeApp() {
+  bindMenuEvents();
+  bindEvents();
+  updateTrainerAvatar(document.getElementById("trainer-one"), "one");
+  updateTrainerAvatar(document.getElementById("trainer-two"), "two");
+}
+
+initializeApp();

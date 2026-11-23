@@ -3,38 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#172554">
-  <title>Pokémon | Batalla local</title>
+  <meta name="theme-color" content="#b9e8ff">
+  <title>Batalla Pokémon | Duelo local</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-palette="kanto">
   <main class="section battle-app">
     <div class="container is-max-desktop">
-      <header class="level app-header">
-        <div class="level-left"><div><p class="eyebrow">MODO LOCAL · 2 JUGADORES</p><h1 class="title is-3">Arena Pokémon</h1></div></div>
-        <div class="level-right"><span id="round-indicator" class="tag is-link is-light is-medium">Preparando partida…</span></div>
-      </header>
+      <section id="menu-screen" class="menu-screen" aria-labelledby="menu-title">
+        <div class="menu-topline"><span class="menu-pokeball" aria-hidden="true"></span><span>DUELO LOCAL · 2 JUGADORES</span></div>
+        <div class="menu-hero">
+          <div class="menu-copy">
+            <p class="eyebrow">PREPARA TU EQUIPO</p>
+            <h1 id="menu-title" class="menu-title">BATALLA<br><span>POKÉMON</span></h1>
+            <p class="menu-description">Elige a tus entrenadores, prepara tus estrategias y descubre quién domina la arena.</p>
+            <div class="pokemon-showcase" role="group" aria-label="Pokémon de la partida">
+              <span class="showcase-pokemon"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" alt="Bulbasaur" width="128" height="128"></span>
+              <span class="showcase-pokemon"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" alt="Pikachu" width="128" height="128"></span>
+              <span class="showcase-pokemon"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" alt="Squirtle" width="128" height="128"></span>
+              <span class="showcase-pokemon"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" alt="Charmander" width="128" height="128"></span>
+            </div>
+            <div class="menu-actions">
+              <button id="open-trainer-select" class="button menu-button menu-button-primary" type="button"><span aria-hidden="true">▶</span> Jugar</button>
+              <button id="open-settings" class="button menu-button menu-button-secondary" type="button"><span aria-hidden="true">⚙</span> Configuración</button>
+            </div>
+            <p class="menu-footnote"><span class="status-dot"></span> Una consola · Dos entrenadores · Una batalla</p>
+          </div>
+        </div>
+        <div class="menu-bottomline"><span>BATALLAS POR TURNOS</span><span>ELIGE · LUCHA · GANA</span><span>EDICIÓN LOCAL</span></div>
+      </section>
 
-      <div id="loading" class="notification is-info is-light loading-banner" role="status">
+      <section id="trainer-screen" class="setup-screen is-hidden" aria-labelledby="trainer-screen-title">
+        <button class="text-back-button" type="button" data-screen="menu">← Menú principal</button>
+        <div class="setup-heading"><p class="eyebrow">ANTES DE EMPEZAR</p><h2 id="trainer-screen-title">Elige a tus entrenadores</h2><p>Cada jugador toma su lugar en la arena. ¿Quién liderará el duelo?</p></div>
+        <div class="trainer-pickers">
+          <label class="trainer-picker trainer-picker-blue" for="trainer-one">
+            <span class="picker-number">JUGADOR 01</span><span class="trainer-avatar trainer-avatar-red" data-avatar="one" aria-hidden="true">R</span>
+            <span class="picker-caption">Entrenador uno</span><select id="trainer-one" class="select trainer-select"><option value="Red">Red</option><option value="Misty">Misty</option><option value="Brock">Brock</option><option value="Leaf">Leaf</option></select>
+          </label>
+          <span class="setup-versus" aria-hidden="true">VS</span>
+          <label class="trainer-picker trainer-picker-coral" for="trainer-two">
+            <span class="picker-number">JUGADOR 02</span><span class="trainer-avatar trainer-avatar-misty" data-avatar="two" aria-hidden="true">M</span>
+            <span class="picker-caption">Entrenador dos</span><select id="trainer-two" class="select trainer-select"><option value="Misty">Misty</option><option value="Red">Red</option><option value="Brock">Brock</option><option value="Leaf">Leaf</option></select>
+          </label>
+        </div>
+        <button id="start-battle" class="button menu-button menu-button-primary start-battle-button" type="button">Comenzar batalla <span aria-hidden="true">→</span></button>
+      </section>
+
+      <section id="settings-screen" class="setup-screen settings-screen is-hidden" aria-labelledby="settings-screen-title">
+        <button class="text-back-button" type="button" data-screen="menu">← Menú principal</button>
+        <div class="setup-heading"><p class="eyebrow">A TU MANERA</p><h2 id="settings-screen-title">Configuración</h2><p>Ajusta la lectura y el ambiente de tu próxima batalla.</p></div>
+        <label class="font-setting" for="font-size-setting"><span><strong>Tamaño de tipografía</strong><small>Haz que los textos sean más cómodos de leer.</small></span><span class="font-setting-control"><span>A</span><input id="font-size-setting" type="range" min="0.9" max="1.2" value="1" step="0.1" aria-label="Tamaño de tipografía"><span class="font-size-large">A</span></span></label>
+        <fieldset class="palette-setting"><legend>Paleta de colores</legend><p>Elige la inspiración de la arena.</p>
+          <div class="palette-options">
+            <button class="palette-option is-selected" type="button" data-palette="kanto" aria-pressed="true"><span class="palette-swatches palette-kanto"><i></i><i></i><i></i></span><strong>Aventura Kanto</strong><small>Rojo · azul · dorado</small></button>
+            <button class="palette-option" type="button" data-palette="johto" aria-pressed="false"><span class="palette-swatches palette-johto"><i></i><i></i><i></i></span><strong>Brisa Johto</strong><small>Verde · jade · crema</small></button>
+            <button class="palette-option" type="button" data-palette="hoenn" aria-pressed="false"><span class="palette-swatches palette-hoenn"><i></i><i></i><i></i></span><strong>Olas Hoenn</strong><small>Turquesa · coral · marino</small></button>
+          </div>
+        </fieldset>
+      </section>
+
+      <div id="loading" class="notification is-info is-light loading-banner is-hidden" role="status">
         <span class="loader-dot" aria-hidden="true"></span><span>Cargando equipos de la PokéAPI…</span>
       </div>
       <div id="error-notice" class="notification is-warning is-light is-hidden" role="status"></div>
 
-      <div id="battle-layout" class="battle-layout">
+      <div id="battle-layout" class="battle-layout is-hidden">
       <section class="arena box" aria-label="Campo de batalla">
         <div class="arena-landscape" aria-hidden="true"></div>
         <div class="trainer-intro" aria-hidden="true">
           <div class="trainer-presentation trainer-presentation-left">
             <span class="trainer-silhouette"><span class="trainer-head"></span><span class="trainer-body"></span></span>
-            <span>Entrenador 1</span>
+            <span id="intro-trainer-one">Red</span>
           </div>
           <div class="trainer-presentation trainer-presentation-right">
             <span class="trainer-silhouette trainer-silhouette-alt"><span class="trainer-head"></span><span class="trainer-body"></span></span>
-            <span>Entrenador 2</span>
+            <span id="intro-trainer-two">Misty</span>
           </div>
         </div>
         <article id="opponent-side" class="pokemon-side opponent-side">
@@ -85,10 +133,25 @@
           <button id="selection-cancel" class="button choice-back-button" type="button">Volver a acciones</button>
         </section>
       </div>
-      <footer class="footer-note">Los datos se cargan desde PokéAPI. Si no hay conexión, se usan equipos de respaldo.</footer>
+      <footer class="footer-note is-hidden">Los datos se cargan desde PokéAPI. Si no hay conexión, se usan equipos de respaldo.</footer>
     </div>
   </main>
   <div id="screen-transition" class="screen-transition" aria-hidden="true"></div>
+  <div id="type-overlay" class="type-overlay" aria-hidden="true"></div>
+  <section id="game-over-screen" class="game-over-screen is-hidden" role="dialog" aria-modal="true" aria-labelledby="winner-title" aria-hidden="true">
+    <div class="winner-panel">
+      <p class="winner-kicker">FIN DE LA BATALLA</p>
+      <h2 id="winner-title" class="winner-title"></h2>
+      <p class="winner-subtitle">¡Su equipo se lleva la victoria!</p>
+      <div class="winner-stage">
+        <div id="winner-team" class="winner-team" aria-label="Pokémon del entrenador ganador"></div>
+      </div>
+      <div class="winner-actions">
+        <button id="restart-game" class="button menu-button menu-button-primary" type="button">Reiniciar batalla</button>
+        <button id="return-to-menu" class="button menu-button menu-button-secondary" type="button">Menú principal</button>
+      </div>
+    </div>
+  </section>
   <script type="module" src="js/script.js"></script>
 </body>
 </html>
