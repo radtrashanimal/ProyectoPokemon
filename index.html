@@ -11,7 +11,12 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-palette="kanto">
+<body data-palette="kanto" class="menu-background-active">
+  <div id="menu-backdrops" class="menu-backdrops" aria-hidden="true">
+    <div class="menu-backdrop menu-backdrop-city is-active"><img src="Resources/PokeCity.png" alt=""></div>
+    <div class="menu-backdrop menu-backdrop-forest"><img src="Resources/PokeForest.png" alt=""></div>
+    <div class="menu-backdrop menu-backdrop-sea"><img src="Resources/PokeSea.png" alt=""></div>
+  </div>
   <main class="section battle-app">
     <div class="container is-max-desktop">
       <section id="menu-screen" class="menu-screen" aria-labelledby="menu-title">
@@ -19,7 +24,7 @@
         <div class="menu-hero">
           <div class="menu-copy">
             <p class="eyebrow">PREPARA TU EQUIPO</p>
-            <h1 id="menu-title" class="menu-title">BATALLA<br><span>POKÉMON</span></h1>
+            <h1 id="menu-title" class="menu-title"><img src="Resources/PokemonLogo.png" alt="Pokémon FireRed"></h1>
             <p class="menu-description">Elige a tus entrenadores, prepara tus estrategias y descubre quién domina la arena.</p>
             <div class="pokemon-showcase" role="group" aria-label="Pokémon de la partida">
               <span class="showcase-pokemon"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" alt="Bulbasaur" width="128" height="128"></span>
@@ -38,7 +43,7 @@
       </section>
 
       <section id="trainer-screen" class="setup-screen is-hidden" aria-labelledby="trainer-screen-title">
-        <button class="text-back-button" type="button" data-screen="menu">← Menú principal</button>
+        <button class="text-back-button" type="button" data-screen="menu-screen">← Menú principal</button>
         <div class="setup-heading"><p class="eyebrow">ANTES DE EMPEZAR</p><h2 id="trainer-screen-title">Elige a tus entrenadores</h2><p>Cada jugador toma su lugar en la arena. ¿Quién liderará el duelo?</p></div>
         <div class="trainer-pickers">
           <label class="trainer-picker trainer-picker-blue" for="trainer-one">
@@ -51,11 +56,41 @@
             <span class="picker-caption">Entrenador dos</span><select id="trainer-two" class="select trainer-select"><option value="Misty">Misty</option><option value="Red">Red</option><option value="Brock">Brock</option><option value="Leaf">Leaf</option></select>
           </label>
         </div>
-        <button id="start-battle" class="button menu-button menu-button-primary start-battle-button" type="button">Comenzar batalla <span aria-hidden="true">→</span></button>
+        <button id="open-pokemon-draft" class="button menu-button menu-button-primary start-battle-button" type="button">Elegir Pokémon <span aria-hidden="true">→</span></button>
+      </section>
+
+      <section id="pokemon-draft-screen" class="setup-screen pokemon-draft-screen is-hidden" aria-labelledby="pokemon-draft-title">
+        <button class="text-back-button" type="button" data-screen="trainer-screen">← Cambiar entrenadores</button>
+        <div class="setup-heading pokemon-draft-heading">
+          <p class="eyebrow">ARMEN SUS EQUIPOS</p>
+          <h2 id="pokemon-draft-title">Elijan sus Pokémon</h2>
+          <p>Se turnan para elegir cuatro Pokémon distintos cada uno.</p>
+          <p id="pokemon-draft-turn" role="status" aria-live="polite"></p>
+        </div>
+        <div class="pokemon-draft-layout">
+          <section class="pokemon-draft-pool" aria-labelledby="pokemon-draft-pool-title">
+            <h3 id="pokemon-draft-pool-title">Pokémon disponibles <span id="pokemon-draft-remaining"></span></h3>
+            <div id="pokemon-draft-choices" class="pokemon-draft-grid"></div>
+          </section>
+          <div class="pokemon-draft-teams">
+            <section class="pokemon-draft-player pokemon-draft-player-one" aria-labelledby="draft-player-one-title">
+              <div class="pokemon-draft-player-heading"><h3 id="draft-player-one-title"></h3><span id="draft-player-one-count"></span></div>
+              <div id="draft-team-one" class="pokemon-draft-team"></div>
+            </section>
+            <section class="pokemon-draft-player pokemon-draft-player-two" aria-labelledby="draft-player-two-title">
+              <div class="pokemon-draft-player-heading"><h3 id="draft-player-two-title"></h3><span id="draft-player-two-count"></span></div>
+              <div id="draft-team-two" class="pokemon-draft-team"></div>
+            </section>
+          </div>
+        </div>
+        <div class="pokemon-draft-actions">
+          <button id="undo-pokemon-pick" class="button pokemon-draft-undo" type="button" disabled>Deshacer selección</button>
+          <button id="start-battle" class="button menu-button menu-button-primary start-battle-button" type="button" disabled>Comenzar batalla <span aria-hidden="true">→</span></button>
+        </div>
       </section>
 
       <section id="settings-screen" class="setup-screen settings-screen is-hidden" aria-labelledby="settings-screen-title">
-        <button class="text-back-button" type="button" data-screen="menu">← Menú principal</button>
+        <button class="text-back-button" type="button" data-screen="menu-screen">← Menú principal</button>
         <div class="setup-heading"><p class="eyebrow">A TU MANERA</p><h2 id="settings-screen-title">Configuración</h2><p>Ajusta la lectura y el ambiente de tu próxima batalla.</p></div>
         <label class="font-setting" for="font-size-setting"><span><strong>Tamaño de tipografía</strong><small>Haz que los textos sean más cómodos de leer.</small></span><span class="font-setting-control"><span>A</span><input id="font-size-setting" type="range" min="0.9" max="1.2" value="1" step="0.1" aria-label="Tamaño de tipografía"><span class="font-size-large">A</span></span></label>
         <fieldset class="palette-setting"><legend>Paleta de colores</legend><p>Elige la inspiración de la arena.</p>
@@ -147,7 +182,7 @@
         <div id="winner-team" class="winner-team" aria-label="Pokémon del entrenador ganador"></div>
       </div>
       <div class="winner-actions">
-        <button id="restart-game" class="button menu-button menu-button-primary" type="button">Reiniciar batalla</button>
+        <button id="restart-game" class="button menu-button menu-button-primary" type="button">Elegir Pokémon otra vez</button>
         <button id="return-to-menu" class="button menu-button menu-button-secondary" type="button">Menú principal</button>
       </div>
     </div>

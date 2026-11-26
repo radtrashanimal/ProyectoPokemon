@@ -93,10 +93,6 @@ export function usarPocion(gameState, player, potionType = "basic", teamIndex = 
 function performAction(gameState, player, action) {
   const pokemon = getActivePokemon(gameState, player);
   const opponent = getActivePokemon(gameState, 1 - player);
-  if (action.type === "flee") {
-    gameState.winner = 1 - player;
-    return `${trainerName(gameState, player)} se rindió. ¡${trainerName(gameState, 1 - player)} gana la batalla!`;
-  }
   if (action.type === "switch") return cambiarPokemon(gameState, player, action.teamIndex).message;
   if (action.type === "potion") {
     const result = usarPocion(gameState, player, action.potionType, action.teamIndex);
@@ -246,7 +242,7 @@ export function ejecutarTurno(gameState, player, action) {
       (move) => Number.isInteger(move.ppActual) && move.ppActual > 0
     );
     if (hasPp) return { ok: false, message: "Todavía tienes movimientos con PP disponibles." };
-  } else if (action.type !== "flee") {
+  } else {
     return { ok: false, message: "Acción no válida." };
   }
   gameState.pendingActions[player] = {
