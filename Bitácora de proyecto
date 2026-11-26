@@ -1,0 +1,142 @@
+Bitácora
+
+Sesión: 1
+Jeremy Michel Menten Cruz
+Sean Alexander Jarvis
+Hernández Moreno Máximo de Jesús 
+Tiempo estimado de trabajo 3 hrs 
+
+Qué hice: Generamos un prompt con gemini para crear la estructura y arquitectura en javascript creando objetos dedicados para cada pokémon y dividiendo la lógica y funciones como calcular daño, usar función, cambiar pokémon, ejecutar turno y actualizar interfaz.
+
+Implementamos bulma para el diseño general del proyecto como el nombre, el nivel, barra de los pokémon y el menú de acciones con los botones luchar, mochila y huir.
+
+Hicimos el uso de una api externa e implementamos funciones asíncronas usando async/ await y fetc, y un manejo de errores con try/catch.
+
+Problema encontrado: Las fuentes de bulma se ven muy genéricas.
+
+Cómo lo resolví: Pidiéndole a la IA que implementara la fuente press start p2.
+
+Decisión tomada: Modificar la fuente.
+
+Commits relacionados: Sesión 1
+
+Pendiente para la siguiente sesión: Cambiar elementos visuales y funcionalidad del código.  
+
+ 10/11/2026  
+
+
+
+Sesión: 2
+Jeremy Michel Menten Cruz
+Sean Alexander Jarvis
+Hernández Moreno Máximo de Jesús 
+Tiempo estimado de trabajo 2 hrs 
+
+Qué hice: En esta sesión refinamos la interfaz visual del simulador de batalla integrando la tipografía Press Start 2P para darle una estética retro fiel a los juegos de Game Boy Advance, y ajustamos el posicionamiento y distribución de los sprites de los Pokémon dentro del escenario de combate mediante CSS y Bulma.
+En cuanto a la lógica en JavaScript, conectamos y completamos las funciones previamente estructuradas para el flujo de turnos: implementamos la mecánica de la mochila para poder utilizar pociones (restaurando los puntos de salud y actualizando la barra de vida en tiempo real) y habilitamos la función para cambiar de Pokémon activo durante la batalla, sincronizando los datos obtenidos de la API con la interfaz de usuario.
+Problema encontrado: Los sprite están orientados incorrectamente.
+
+Cómo lo resolví: Solo seleccionando los sprite correspondientes por cada área del código. 
+
+Decisión tomada: Modificar la orientación de los sprites. 
+
+Commits relacionados: Sesión 11 11 10:53
+
+Pendiente para la siguiente sesión: Cambiar el estilo de bulma por uno que resemble pokémon.
+
+
+
+
+
+
+Sesión: 3
+Jeremy Michel Menten Cruz
+Sean Alexander Jarvis
+Hernández Moreno Máximo de Jesús 
+Tiempo estimado de trabajo 2 30 hrs 
+
+Qué hice: Añadí ataques por Pokémon con datos de PokéAPI, equipos de cuatro Pokémon, paneles de cambio y mochila, y avance automático de turno. También reorganicé la batalla, añadí animaciones escalonadas para indicar el turno activo y transiciones al cambiar de Pokémon. Ajusté el campo para que use mejor la pantalla y los sprites no se salgan.
+
+Problema encontrado: los elementos de bulma no son visualmente atractivos, y no es fácil de distinguir de quién es el turno.
+
+Cómo lo resolví: Usando imágenes dibujadas como boceto  de referencia y usando las imágenes de los juegos originales para las paletas de colores.
+
+Decisión tomada: Modificar los elementos visuales para que resemblen mas pokemon, y las animaciones indique de quién es el turno.
+
+Commits relacionados: sesión 11 17 2026 10:06
+
+Pendiente para la siguiente sesión: Ajustamos la interfaz y el tamaño de los pokémon 
+
+Sesión: 4
+Jeremy Michel Menten Cruz
+Sean Alexander Jarvis
+Hernández Moreno Máximo de Jesús 
+Tiempo estimado de trabajo 3 hrs 
+
+Qué hice: Centré los Pokémon en sus plataformas, ajusté su posición vertical y corregí el sprite mostrado en la mochila. Integré los ataques en el menú de acciones, añadí la opción de volver al menú principal y ajusté el tamaño de los controles y mensajes.
+Problema encontrado: El primer ajuste vertical fue en la dirección equivocada y, al rediseñar el menú, los ataques dejaron de funcionar.
+
+Cómo lo resolví: Corregí la posición y conecté los botones nuevos con las acciones de batalla existentes.
+
+Decisión tomada: Mantener el tamaño de los controles estable durante las notificaciones, sin fijar rígidamente la altura de los botones de ataque.
+
+Commits relacionados: sesión 11 19 11:16
+
+Pendiente para la siguiente sesión: Agregar una opción de regresar desde el nuevo menú de ataques. 
+
+
+Sesión: 5
+Jeremy Michel Menten Cruz
+Sean Alexander Jarvis
+Hernández Moreno Máximo de Jesús 
+Tiempo estimado de trabajo 4 hrs 
+
+Qué hice:Apliqué el estilo pixelado y añadí una opción para volver desde los menús de ataques, mochila y Pokémon.
+
+Creé el menú principal con selección de entrenadores, ajustes de tipografía y paletas Kanto, Johto y Hoenn. También añadí animaciones distintas para ataques, transiciones al cambiar Pokémon, mochila con tres tipos de poción, efectos por tipo, pantalla de victoria y una animación idle compartida.
+
+Problema encontrado: Faltaban opciones de configuración y varias acciones de batalla que faltaban respuesta visual
+
+Cómo lo resolví: Integre esas opciones y efectos con las pantallas y controles de batalla existentes.
+
+Decisión tomada: Mantener una apariencia consistente entre los menús de Pokemon y mochila y asignas efectos distintos a los tipos de ataque.
+
+Commits relacionados:  sesión11 19 11:16 (Error al recordar modificar la hora)
+
+Pendiente para la siguiente sesión: Agregar una selección de pokémon al inicio de cada partida.
+
+
+Sesión: 6
+Jeremy Michel Menten Cruz
+Sean Alexander Jarvis
+Hernández Moreno Máximo de Jesús 
+Tiempo estimado de trabajo 2 hrs 
+
+Qué hice: Dupliqué las dimensiones de los sprites y ajusté su posición vertical. Reconstruí el menú con el logo y fondos de ciudad, bosque y mar; añadí paneo, cambios aleatorios cada diez segundos y fundidos. También implementé la selección alternada de equipos sin Pokémon repetidos.
+
+Problema encontrado: Había que recuperar el diseño del menú después de actualizar las imágenes y evitar que ambos jugadores eligieran el mismo Pokémon.
+
+Cómo lo resolví: Aleatoricé los fondos y retiré cada Pokémon elegido del conjunto disponible. La partida comienza al completar ambos equipos.
+
+Decisión tomada: Cada jugador elige cuatro Pokémon; un Pokémon seleccionado ya no aparece como opción para el otro.
+
+Commits relacionados: sesión  11 23 12:23 Pm 
+
+Pendiente para la siguiente sesión: Ya es el final, solo afinar una que otra cosa.
+
+
+Sesión: 7
+Jeremy Michel Menten Cruz
+Sean Alexander Jarvis
+Hernández Moreno Máximo de Jesús 
+Tiempo estimado de trabajo 2 hrs 
+
+Qué hice: Terminamos todos los detalles faltantes, corregimos pequeños detalles como el apartado de no huir en medio de la batalla  
+
+Problema encontrado: Al momento de presionar el botón huir, se concluye la batalla.
+
+Cómo lo resolví: Quitando la funcionalidad del botón huir, reemplazandolo con una notificación. “No se puede huir de una batalla de entrenador”.
+
+Decisión tomada: Cambiar el comportamiento del botón huir.
+
+Commits relacionados: Sesión 11 25 7:45 Pm
