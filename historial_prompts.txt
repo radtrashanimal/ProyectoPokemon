@@ -1,0 +1,226 @@
+HISTORIAL COMPLETO DE PROMPTS — PROYECTO POKEMON
+
+Repositorio: radtrashanimal/ProyectoPokemon
+Directorio: C:\Users\Jeremy cruz\Desktop\ProyectoPokemon
+
+Los textos siguientes se conservan tal como fueron recuperados, incluyendo errores ortograficos y de acentuacion.
+
+
+SESION: a142cdd0-1430-4df6-a9dc-c72354d7e622
+Fecha: 11 de noviembre de 2026
+
+[2026-11-11 16:01:46]
+En el mismo PokeAPI puedes obtener los sprites de iconos como el menu de seleccion de accion y fuentes de pokemon FIre Red o fuentes pixeleadas_
+
+[2026-11-11 16:10:07]
+Haz esa correccion y anade una funcionalidad para podar regresar a la previa accion, ej. (atacar > regresar a menu de seleccion de ataque, huir, mochila)
+
+[2026-11-11 16:13:11]
+Como puedo utilizar los sprites oficiales, podria crear una carpeta de recuros y descargarlos de manera externa o hay alguna manera de preconectar a un sitio con estos recursos?
+
+
+SESION: d56ce5fe-269b-43ee-a99e-7ac8d0cb0900
+Fecha: 17 de noviembre de 2026
+
+[2026-11-17 15:19:50]
+Agrega diferentes ataques para cada uno de los pokemon, recolecta la informacion de pokeAPI, haz los sprites de los pokemon en la batalla mas grandes, 50% mas grandes. Quita hacerle click para confirmar cada accion despues de seleccionar el ataque y para confirmar el cambio de turno de jugador, cambia la tipografia de los bloques de info de los pokemon a la tipografia que tenemos pixeleada, agrega un hover que cambie el tamano de las opciones seleccionables por un poquito, al momento de cambiar un pokemon abrir una nueva ventana dentro de la misma pagina en la que puedas entrar y salir cuando necesites, dentro de esta habra los 3 otros pokemon disponibles para cada entrenador junto con su informacion como sus puntos de vida, nivel, nombre, elemento y a la derecha de todo eso su pequeno sprite para reconocer que pokemon es, tambien agrega una funcion similar para la mochila en donde puedas ver la pocion de vida
+
+[2026-11-17 15:32:56]
+Toma esta imagen de referencia para la reorganizacion del UI, el texto actual no lo cambies solamente cambia el acomodo de todo en general
+
+[2026-11-17 15:40:15]
+Haz que al momento de jugar un turno con cada jugador, se haga un highlight de manera de animacion en el bloque de la informacio del pokemon y en el sprite del pokemon, que sea una animacion de solo dos frames en donde el pokemon haga un pequeno salto cada 3 segundos y en donde la barra de informacion haga un pequeno salto igual de dos frames pero cada 5 segundos, esto para poder diferenciar quien esta jugando el turno
+
+[2026-11-17 15:43:55]
+Quitale el resaltado de color al pokemon, y su animacion quitale su animacion interpolada fluida y que sea una animacio instantane de arriba abajo, staggered
+
+[2026-11-17 15:45:10]
+Haz lo mismo con la animacion de la caja de informacion de pokemon, animacion staggered
+
+[2026-11-17 15:49:16]
+Toma como referencia de UI esta imagen que es tomada del juego y reorganiza el UI actual para que tenga el mayor parecido a este
+
+[2026-11-17 16:06:41]
+Al momento de cambiar pokemon o cuando derriban a uno de tus pokemon agregar una interfaz como esta, primero hacer un fade in a una pantalla negra y un fadeout para luego entrar a este menu y al salir de este menu hacer un fade in a una pantalla blanca que empieze desde el medio y un fade out de esta misma pero al inverso
+
+
+SESION: add93d24-76be-4f86-ab29-abb776bb53a6
+Fecha: 17 de noviembre de 2026
+
+[2026-11-17 16:31:51]
+Haz que el videojuego sea fullscreen, manteniedo su misma funcionalidad
+
+[2026-11-17 16:36:11]
+Ajusta la escala de los sprite de los pokemon por que se ven muy pequenos y se salieron del lugar
+
+[2026-11-17 16:41:42]
+Considera las dimensiones de esta imagen de referencia pra lospokemon y las cajas de informacion de los pokemon
+
+[2026-11-17 16:43:38]
+En el fondo, en el espacio verde ahi no esta el pokemon enemigo, centra el espacio verde con el pokemon o viceversa como mejor funcione
+
+[2026-11-17 16:48:02]
+Haz los sprites de los pokemon 100% mas grandes
+
+[2026-11-17 17:17:29]
+reduce el tamano de la ventana de batalla para que quepa en toda la pagina web sin la necesidad de hacer scroll
+
+
+SESION: 4017b797-43b7-4430-a19a-04a62be19145
+Fecha: 19 de noviembre de 2026
+
+[2026-11-19 16:06:48]
+Quiero hacer algunos cambios de estilo. Quiero que los pokemons esten centrados en sus plataformas respectivas
+
+[2026-11-19 16:10:33]
+Bien sus pocisiones horizontales estan correctos ahora solo la hay que ajustar la posiocion vertical o en y. Hay que incrementar el valor de ambos pokemons para que quenden perfectamente centrados.
+
+[2026-11-19 16:12:45]
+tuvo el efecto contrario mas bien hay que reducir la pocision vertical
+
+[2026-11-19 16:13:39]
+reduce la pocision vertical un poco mas para centrar la pocision
+
+[2026-11-19 16:18:25]
+Reduce un poco mas la pocision vertical. Otro cambio que necesito es que solo se permitan sprites de frente cuando viendo la mochila. Ahorita pikachu aprece de espalda. Tiene que ser el sprite de frente
+
+[2026-11-19 16:28:29]
+Quiero hacer otros cambios de ui. Quiero que las opciones de ataque se contengan todas dentro de aqui. Despues de selecionar luchar actualizar las opciones a los ataques respectivos al pokemon, e implementar una opcion de regresar al menu principal
+
+[2026-11-19 16:36:25]
+Perfecto ahora quiero que la escala de los menus inferiores se mantengan consistentes despues de confirmar los ataques no quiero que pierda escala
+
+[2026-11-19 16:37:53]
+why cant i keep the changes?
+
+[2026-11-19 16:43:47]
+no puedo confirmar los cambios porque el codigo fue modificado posteriormente a confirmar
+
+[2026-11-19 16:45:30]
+Summarize the attached history item
+
+[2026-11-19 16:46:07]
+porque se creo un commit?
+
+[2026-11-19 16:46:57]
+COmo cancelo ese commit
+
+[2026-11-19 16:48:43]
+como abro una ventana corriendo el codigo localmaente?
+
+[2026-11-19 16:53:12]
+abre una ventana dentro de visual studio con el codigo corriendo porfavor
+
+[2026-11-19 16:54:51]
+los ataques ahora estan bien centrados pero perdieron toda su funcionalidad hay que ligar los ataques para que sigan funcionando con los nuevos menus
+
+[2026-11-19 17:03:24]
+Hay que revertir los cambios de mantener la escala exacta en el menu de ataques nuevo. A lo que me referia con eso es que se mateniera cuando se muestra la notificacion ataque selecionado y turno completado.
+
+[2026-11-19 17:05:35]
+Perfecto es exactamente lo que queria. Ahora solo incrementa un poco la esacala para que todas las opciones quepan dentro del encuadre.
+
+[2026-11-19 17:08:54]
+muy bien tambien incrementa ligeramente el menu inferior verticalmente. Y reduce el tamno de la pantalla de batalla si es necesario. Todo con el fin de mantener la escala total actual, y que los atques sean completamente visibles
+
+[2026-11-19 17:12:49]
+Exactamente lo que requeria. aparce el texto del inventario el parte inferior de el menu de opciones mostrando cuantas posciones hay como quitamos eso?
+
+[2026-11-19 17:22:12]
+todavia hay 22 lineas que estan pendientes y no me deja confirmar me da un error cada vez que intento
+
+[2026-11-19 17:37:38]
+quiro que el simbolo de vs desvanesca con los simbolos de los entrenadores en el intro inicial
+
+[2026-11-19 17:38:59]
+si desvanece pero quiro que permanezca oculto posterior a desaparecer
+
+[2026-11-19 18:10:48]
+Por que hay un error?
+
+
+SESION: 776dcd8b-56b2-4b4e-ac19-3c6a91bd32e9
+Fecha: 23 de noviembre de 2026
+
+[2026-11-23 17:16:06]
+Me puedes hacer una pantalla de inicio de menu en la que se vea en el titulo batalla pokemon, usando una estetica simular a la de la batalla, solamente que el fondo no tendria gradiente de verde a hazul sino que seria azul claro. en esta pantalla podras seleccionar Jugar, y al momento de seleccionarlo se podra asignar el entrenador de los dos jugadores. tambien habra una seccion de configuracion que permita cambiar el tamano de la tipografia y ajustar la paleta de colores de el minijuego, haz 3 diferentes paletas de colores inspiradas en pokemon.
+
+[2026-11-23 17:23:17]
+Para la pantalla principal mejor dejalo todo centrado y decoralo no con esa imagen pero con los sprites de los pokemon del juego
+
+[2026-11-23 17:26:49]
+Ajusta la batalla para eliminar estos elementos, pienso que no son tan relevantes
+
+[2026-11-23 17:35:17]
+haz que los 4 botones de ataque tengan diferente animacion de ataque cada uno, la preterminada es un thrust pero podrias agregar diferente timing para el segundo boton como un double thrust o uno que vaya para atras y despues haga un yhrust agresivo
+
+[2026-11-23 17:43:30]
+haz que al momento de cambiar de pkemon se haga una pequena animacion al momento de entar para que no se vea tan instantanea, haz que es sprite empieze todo blanco y que haga un fade in a su estado normal, mientras qyue se desliza de un lado para llegar a su posicion original, haz que la mochila tenga un menu similar a el menu de seleccion de pokemon en donde puedes seleccionar tu pocion y luego selccionar a quien se la daras, haz 2 otras posiones una pocion mediana y una pocion grande que cada una cure un poco mas que la otra
+
+[2026-11-23 17:55:39]
+Agrega animaciones en toda la pantalla de la batalla, como tipo overlay al momento de hacer seleccion de un ataque elemental, ej, si es electrico un efecto amarillo y si es un ataque de planta un efecto verde. tambien al momento de que un jugador se rinda o gane la batalla una pantalla final en donde diga "entrenador (entrenador que gano) gano la partida! y haya un boton de reiniciar o volver al menu principal, para la decoracion pon los 3 poemon del entrenador que gano, sus sprites. en un "spotlight" por asi decir
+
+[2026-11-23 18:09:05]
+Para los ataques elementales haz que cada animacion sea unica, en ataques de agua haz que sea afecto como de una ola, en donde el azul pase de izquierda a derecha dos veces, en general los efectos de todos los ataques haz que sean 25% mas lento. El menu de la mochila haz que tenga una apariencia igual a la de el menu de pokemon, igual con las mismas transciciones. Haz que al momento de recibir dano y curar a un pokemon, la barra valla un 50% mas lento
+
+[2026-11-23 18:23:09]
+Haz que todos los pokemon compartan la misma animacion iddle de stepped animation de pikachu y eevee, note que los demas pokemon no hacen ese bounce como los primeros pokemons, haz que tengan la misma animacion, haz que al momento de llegar a la pantalla final de resultados haya un fade in y fade out de color blanco asi como cuando entras al menu de pokemon
+
+
+SESION: 8d562c36-4ce0-4c5a-955a-4735411cf516
+Fecha: 25 de noviembre de 2026
+
+[2026-11-25 15:44:00]
+Incrementa las dimensiones de los sprites por un 100% manteniendo la posicion originaol
+
+[2026-11-25 15:45:40]
+reduce su posicion en Y de ambos sprites para centrarlos un poco
+
+[2026-11-25 15:46:30]
+Un poco mas
+
+[2026-11-25 16:09:34]
+Recrea el primer menu principal en donde uses PokemonLogo centrado Y donde uses las imagenes Pokecity, Pokeforest y Pokesea como fondon, haz un paneo lento de ellas y alternalas despues de 10 segundos con un fade in entre cada imagen
+
+[2026-11-25 16:15:22]
+Vuelve hacer todo el proceso por que edite las imagenes, dejalo igual como lo teniamos
+
+[2026-11-25 16:17:32]
+radomize imagenes
+
+[2026-11-25 16:19:41]
+Baja la opacidad un poco, y haz que el fondo sea fullscreen
+
+[2026-11-25 16:25:20]
+Haz una funcionalidad que a la hora de elejir tu entrenador, poder elegir los pokemon con quien va jugar cada jugador, si el pokemon ya fue elegido no darle la opcion al otro jugador de elegirlo.
+
+[2026-11-25 16:33:14]
+Haz el boton de jugar y configuracion de manera vertical y mas grandes, y el recuadro blanco vertical eliminalo, baja mucha mas la opacidad para que se vea mas colorido el fondo
+
+[2026-11-25 16:41:37]
+## 2026-11-10 — Sesión 4 (1.5 h)
+*Integrante(s):* Ana, Luis
+*Qué hice:* Implementé la función calcularDanio con STAB y efectividad.
+*Problema encontrado:* El daño salía con decimales y la vida quedaba en 12.75.
+*Cómo lo resolví:* Agregué Math.floor al resultado final y lo probé con 5 combinaciones.
+*Decisión tomada:* La tabla de efectividad será un objeto anidado en lugar de un switch, porque es
+más fácil agregar tipos.
+*Commits relacionados:* a3f9c21, b77e104
+*Pendiente para la siguiente sesión:* Animación de la barra de vida.   Basandote en este ejemplo, necesito que recuperes los chats de nuestras previas sesiones y me ayudes a completar dependiendo de todos los commits que hicimos, basalo en nuestro chat
+
+[2026-11-25 16:44:53]
+puedes ponermelo todo en un nuevo archivo de texto se me olvido dev=cirte eso, lo que acabas de hacer rehacelo en un nuevo txt.
+
+[2026-11-25 17:28:33]
+Hay que arreglar el boton de regresar de configuraciones se congela y no funciona. Tambien dentro de las configuraciones quiero que se mantega el fondo de el menu principal. Al ganar la partida quiero que el programa regrese a la seleccion de pokemon en lugar de ir directamente a la batalla.
+
+[2026-11-25 17:33:22]
+Tambien quiro remover la funcionalidad de la opcion de huir. Al dar click a el boton de huir que solo aparezca una notificacion " ¡No puedes huir de un
+combate contra un entrenador!"
+
+
+SESION ACTUAL: 87be6fea-1600-495c-bd48-1f8a3829a1c7
+Fecha: 26 de noviembre de 2026
+
+[2026-11-26 19:58:30]
+Dame un historial de todos los promts utilizados en este proyecto y adjuntalos en un nuev archivo de texto
